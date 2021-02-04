@@ -43,25 +43,6 @@ class Tile():
         self.col = col
         self.loc = (row, col)
 
-    def get_tile_colors(self):
-
-        # Find appropriate tile color
-        tile_colors = [
-            ("#8C6C50", "#DBBFA0"),  # Normal tiles
-            ("#71b651", "#a6ce9d"),  # Red goal tiles
-            ("#ba6262", "#ce9d9d")   # Green goal tiles
-        ]
-        tile_color = tile_colors[self.tile][(self.loc[0] + self.loc[1]) % 2]
-
-        # Find appropriate outline color
-        outline_colors = [
-            tile_color,
-            "yellow",  # TODO: Change
-            "#1100BB"
-        ]
-        outline_color = outline_colors[self.outline]
-
-        return tile_color, outline_color
 
     def __str__(self):
         return chr(self.loc[1] + 97) + str(self.loc[0] + 1)

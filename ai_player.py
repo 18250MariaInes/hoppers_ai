@@ -10,17 +10,19 @@ from tile import Tile
 
 class Halma():
 
-    def __init__(self, b_size=10, t_limit=60, c_player=Tile.P_RED):
-
-        # Create initial board
-        board = [[None] * b_size for _ in range(b_size)]
+    def __init__(self):
+        self.b_size = 10
+        self.t_limit = 20
         
-        for row in range(b_size):
-            for col in range(b_size):
+        # Create initial board
+        board = [[None] * self.b_size for _ in range(self.b_size)]
+        
+        for row in range(self.b_size):
+            for col in range(self.b_size):
 
                 if row + col < 5:
                     element = Tile(2, 2, 0, row, col)
-                elif 1 + row + col > 2 * (b_size - 3):
+                elif 1 + row + col > 2 * (self.b_size - 3):
                     
                     element = Tile(1, 1, 0, row, col)
                 else:
@@ -29,9 +31,7 @@ class Halma():
                 board[row][col] = element
         #print(board)
         # Save member variables
-        self.b_size = b_size
-        self.t_limit = t_limit
-        self.c_player = c_player
+        self.c_player = Tile.P_RED
         self.board = board
         self.current_player = Tile.P_GREEN
         self.selected_tile = None
@@ -48,17 +48,12 @@ class Halma():
                         for t in row if t.tile == Tile.T_GREEN]
 
         if self.c_player == self.current_player:
-            print("hooola")
             self.execute_computer_move()
         
-        print("JUGADOr:")
-        print(c_player)
+        
 
         # Print initial program info
-        print("Halma Solver Basic Information")
-        print("==============================")
-        print("AI opponent enabled:", "no" if self.c_player is None else "yes")
-        print("A-B pruning enabled:", "yes" if self.ab_enabled else "no")
+        print("Hoppers game with AI by María Inés Vásquez")
         print("Turn time limit:", self.t_limit)
         print("Max ply depth:", self.ply_depth)
         print()
