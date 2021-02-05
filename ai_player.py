@@ -8,7 +8,7 @@ from board import Board
 from tile import Tile
 
 
-class Halma():
+class Ai_player():
 
     def __init__(self):
         self.b_size = 10
@@ -34,7 +34,6 @@ class Halma():
         self.c_player = Tile.P_RED
         self.board = board
         self.current_player = Tile.P_GREEN
-        self.selected_tile = None
         self.valid_moves = []
         self.computing = False
         self.total_plies = 0
@@ -44,73 +43,21 @@ class Halma():
 
         self.r_goals = [t for row in board
                         for t in row if t.tile == Tile.T_RED]
+        print(self.r_goals)
         self.g_goals = [t for row in board
                         for t in row if t.tile == Tile.T_GREEN]
+        print(self.g_goals)
 
-        if self.c_player == self.current_player:
-            self.execute_computer_move()
-        
-        
+        """if self.c_player == self.current_player:
+            self.execute_computer_move()"""
 
         # Print initial program info
         print("Hoppers game with AI by María Inés Vásquez")
-        print("Turn time limit:", self.t_limit)
-        print("Max ply depth:", self.ply_depth)
+        print("Playing against: AI-ba")
+        """print("Turn time limit:", self.t_limit)
+        print("Max ply depth:", self.ply_depth)"""
         print()
 
-    def tile_clicked(self, row, col):
-        """row = input("Ingrese tecla que desea mover:")
-        col = input("Ingrese posición nueva :")"""
-        print(row, col)
-
-        if self.computing:  # Block clicks while computing
-            return
-
-        new_tile = self.board[row][col]
-
-        # If we are selecting a friendly piece
-        if new_tile.piece == self.current_player:
-
-            self.outline_tiles(None)  # Reset outlines
-
-            # Outline the new and valid move tiles
-            new_tile.outline = Tile.O_MOVED
-            self.valid_moves = self.get_moves_at_tile(new_tile,
-                self.current_player)
-            self.outline_tiles(self.valid_moves)
-
-            # Update status and save the new tile
-            print("Tile `" + str(new_tile) + "` selected")
-            self.selected_tile = new_tile
-
-        # If we already had a piece selected and we are moving a piece
-        elif self.selected_tile and new_tile in self.valid_moves:
-            """selected = input("Ingrese tecla que desea mover:")
-            move_to = input("Ingrese posición nueva :")"""
-            
-            self.outline_tiles(None)  # Reset outlines
-            print("******************************")
-            print(self.selected_tile, new_tile)
-            self.move_piece(self.selected_tile, new_tile)  # Move the piece
-
-            # Update status and reset tracking variables
-            self.selected_tile = None
-            self.valid_moves = []
-            self.current_player = (Tile.P_RED
-                if self.current_player == Tile.P_GREEN else Tile.P_GREEN)
-
-            # If there is a winner to the game
-            winner = self.find_winner()
-            if winner:
-                print("The " + ("green"
-                    if winner == Tile.P_GREEN else "red") + " player has won!")
-                self.current_player = None
-
-            elif self.c_player is not None:
-                self.execute_computer_move()
-
-        else:
-            print("Invalid move attempted")
 
     def minimax(self, depth, player_to_max, max_time, a=float("-inf"),
                 b=float("inf"), maxing=True, prunes=0, boards=0):
@@ -157,8 +104,6 @@ class Halma():
 
                 if maxing and val > best_val:
                     best_val = val
-                    """print("*************************")
-                    print(to.loc)"""
                     best_move = (move["from"].loc, to.loc)
                     a = max(a, val)
 
@@ -173,14 +118,11 @@ class Halma():
         return best_val, best_move, prunes, boards
 
     def execute_computer_move(self):
-        #print(self.c_player, "c_player")
-
         # Print out search information
         current_turn = (self.total_plies // 2) + 1
-        print("Turn", current_turn, "Computation")
-        print("=================" + ("=" * len(str(current_turn))))
-        print("Executing search ...", end=" ")
-        sys.stdout.flush()
+        print("Turn de Al-ba")
+        print("--------------------------")
+        print("Calculando ...")
 
         # self.board_view.set_status("Computing next move...")
         self.computing = True
@@ -192,33 +134,23 @@ class Halma():
             self.c_player, max_time)
         end = time.time()
 
-        # Print search result stats
-        print("complete")
-        print("Time to compute:", round(end - start, 4))
-        print("Total boards generated:", boards)
-        print("Total prune events:", prunes)
-
-        # Move the resulting piece
-        self.outline_tiles(None)  # Reset outlines
         """MOVE ES EL MOVIMIENTO DE AI"""
-        print("MOVEEE")
-        print(move)
+        print("Al-ba se ha movido de "+str(move[0])+" a "+str(move[1]))
         move_from = self.board[move[0][0]][move[0][1]]
         move_to = self.board[move[1][0]][move[1][1]]
         self.move_piece(move_from, move_to)
 
         winner = self.find_winner()
         if winner:
-            print("The " + ("green"
-                if winner == Tile.P_GREEN else "red") + " player has won!")
+            print("AI-BA HA GANADO!")
             self.current_player = None
 
-            print()
+            """print()
             print("Final Stats")
             print("===========")
             print("Final winner:", "green"
                 if winner == Tile.P_GREEN else "red")
-            print("Total # of plies:", self.total_plies)
+            print("Total # of plies:", self.total_plies)"""
 
         else:  # Toggle the current player
             self.current_player = (Tile.P_RED
@@ -321,8 +253,8 @@ class Halma():
 
         # Handle trying to move a non-existant piece and moving into a piece
         if from_tile.piece == Tile.P_NONE or to_tile.piece != Tile.P_NONE:
-            print("Invalid move")
-            return
+            print("Movimiento inválido, vuelva a ingresar valores")
+            return False
 
         # Move piece
         to_tile.piece = from_tile.piece
@@ -334,9 +266,6 @@ class Halma():
 
         self.total_plies += 1
 
-        print("Piece moved from `" + str(from_tile) +
-            "` to `" + str(to_tile) + "`, " + ("green's" if
-            self.current_player == Tile.P_RED else "red's") + " turn...")
 
     def find_winner(self):
 
@@ -347,14 +276,6 @@ class Halma():
         else:
             return None
 
-    def outline_tiles(self, tiles=[], outline_type=Tile.O_SELECT):
-
-        if tiles is None:
-            tiles = [j for i in self.board for j in i]
-            outline_type = Tile.O_NONE
-
-        for tile in tiles:
-            tile.outline = outline_type
 
     def utility_distance(self, player):
 
@@ -384,12 +305,11 @@ class Halma():
         return value
     
     #mi jugada
-    def execute_player_move(self):
-
+    def human_player_move(self):
         current_turn = (self.total_plies // 2) + 1
-        print("Turn", current_turn, "Player")
-        print("=================" + ("=" * len(str(current_turn))))
-        sys.stdout.flush()
+        validation = True
+        print("¡Tu turno!")
+        print("----------------------------------")
 
         row_old = int(input("Ingrese tecla que desea mover:"))
         col_old = int(input("Ingrese posición nueva :"))
@@ -398,41 +318,40 @@ class Halma():
         col_new = int(input("Ingrese posición nueva :"))
         
         move_from = self.board[row_old][col_old]
+        self.valid_moves = self.get_moves_at_tile(move_from,1)
+
         move_to = self.board[row_new][col_new]
-        self.move_piece(move_from, move_to)
+        print("Te has movido de ("+str(row_old)+","+str(col_old)+") a ("+str(row_new)+","+str(col_new)+")")
+        if (move_to not in self.valid_moves):
+            print("Ese movimiento no es válido porque fuera de lugar")
+            return
+        else:
+            validation = self.move_piece(move_from, move_to)
+
+        
 
         winner = self.find_winner()
         #print(self.c_player, "c_player")
         if winner:
-            print("The " + ("green"
-                if winner == Tile.P_GREEN else "red") + " player has won!")
+            print("LE HAS GANADO A AIBA!")
             self.current_player = None
 
-            print()
+            """print()
             print("Final Stats")
             print("===========")
             print("Final winner:", "green"
                 if winner == Tile.P_GREEN else "red")
-            print("Total # of plies:", self.total_plies)
+            print("Total # of plies:", self.total_plies)"""
+        elif (validation==False):
+            self.human_player_move()
         elif self.c_player is not None:
             self.execute_computer_move()
         else:  # Toggle the current player
             self.current_player = (Tile.P_RED
                 if self.current_player == Tile.P_GREEN else Tile.P_GREEN)
+        
 
         
 
             
-
-        
-
-
-if __name__ == "__main__":
-    halma = Halma()
-    while halma.find_winner() == None:
-        for i in halma.board:
-            for j in i:
-                print(j.piece, end=" ")
-            print()
-        print("------------------------------------")
-        halma.execute_player_move()
+    
