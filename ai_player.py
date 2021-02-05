@@ -1,11 +1,10 @@
 # Python Standard Library imports
-import sys
 import time
 import math
 
 # Custom module imports
-from board import Board
-from tile import Tile
+from board_game_components import Board, Tile
+#from tile import Tile
 
 
 class Ai_player():
@@ -21,35 +20,31 @@ class Ai_player():
             for col in range(self.b_size):
 
                 if row + col < 5:
-                    element = Tile(2, 2, 0, row, col)
+                    element = Tile(2, 2, row, col)
                 elif 1 + row + col > 2 * (self.b_size - 3):
                     
-                    element = Tile(1, 1, 0, row, col)
+                    element = Tile(1, 1, row, col)
                 else:
-                    element = Tile(0, 0, 0, row, col)
+                    element = Tile(0, 0, row, col)
 
                 board[row][col] = element
         #print(board)
         # Save member variables
-        self.c_player = Tile.P_RED
+        self.c_player = 2
         self.board = board
-        self.current_player = Tile.P_GREEN
+        self.current_player = 1
         self.valid_moves = []
         self.computing = False
         self.total_plies = 0
 
         self.ply_depth = 3
-        self.ab_enabled = True
+        #self.ab_enabled = True
 
         self.r_goals = [t for row in board
-                        for t in row if t.tile == Tile.T_RED]
-        print(self.r_goals)
+                        for t in row if t.tile == 2]
         self.g_goals = [t for row in board
-                        for t in row if t.tile == Tile.T_GREEN]
-        print(self.g_goals)
+                        for t in row if t.tile == 1]
 
-        """if self.c_player == self.current_player:
-            self.execute_computer_move()"""
 
         # Print initial program info
         print("Hoppers game with AI by María Inés Vásquez")
@@ -73,8 +68,8 @@ class Ai_player():
             moves = self.get_next_moves(player_to_max)
         else:
             best_val = float("inf")
-            moves = self.get_next_moves((Tile.P_RED
-                    if player_to_max == Tile.P_GREEN else Tile.P_GREEN))
+            moves = self.get_next_moves((2
+                    if player_to_max == 1 else 1))
         # For each move
         for move in moves:
             #print(move)
@@ -87,7 +82,7 @@ class Ai_player():
 
                 # Move piece to the move outlined
                 piece = move["from"].piece
-                move["from"].piece = Tile.P_NONE
+                move["from"].piece = 0
                 to.piece = piece
                 boards += 1
 
@@ -99,7 +94,7 @@ class Ai_player():
                 boards = new_boards
 
                 # Move the piece back
-                to.piece = Tile.P_NONE
+                to.piece = 0
                 move["from"].piece = piece
 
                 if maxing and val > best_val:
@@ -112,12 +107,12 @@ class Ai_player():
                     best_move = (move["from"].loc, to.loc)
                     b = min(b, val)
 
-                if self.ab_enabled and b <= a:
+                if b <= a:
                     return best_val, best_move, prunes + 1, boards
 
         return best_val, best_move, prunes, boards
 
-    def execute_computer_move(self):
+    def AIba_turn(self):
         # Print out search information
         current_turn = (self.total_plies // 2) + 1
         print("Turn de Al-ba")
@@ -149,12 +144,12 @@ class Ai_player():
             print("Final Stats")
             print("===========")
             print("Final winner:", "green"
-                if winner == Tile.P_GREEN else "red")
+                if winner == 1 else "red")
             print("Total # of plies:", self.total_plies)"""
 
         else:  # Toggle the current player
-            self.current_player = (Tile.P_RED
-                if self.current_player == Tile.P_GREEN else Tile.P_GREEN)
+            self.current_player = (2
+                if self.current_player == 1 else 1)
 
         self.computing = False
         print()
@@ -188,13 +183,7 @@ class Ai_player():
         col = tile.loc[1]
 
         # List of valid tile types to move to
-        valid_tiles = [Tile.T_NONE, Tile.T_GREEN, Tile.T_RED]
-        if tile.tile != player:
-            #print("ya estas aqui men")
-            valid_tiles.remove(player)  # Moving back into your own goal
-        if tile.tile != Tile.T_NONE and tile.tile != player:
-            #print("pa que te vassssss")
-            valid_tiles.remove(Tile.T_NONE)  # Moving out of the enemy's goal
+        valid_tiles = [0, 1, 2]
 
         # Find and save immediately adjacent moves
         for col_delta in range(-1, 2):
@@ -215,14 +204,7 @@ class Ai_player():
                 # Handle moves out of/in to goals
                 new_tile = self.board[new_row][new_col]
                 
-                if new_tile.tile not in valid_tiles: # para no poder regresar a mi área después de salir
-                    """print("no es valid tiles")
-                    print(valid_tiles)
-                    print(new_tile.tile)"""
-                    continue
-                
-
-                if new_tile.piece == Tile.P_NONE:
+                if new_tile.piece == 0:
                     if adj:  # Don't consider adjacent on subsequent calls 
                     #si hay un movimiento para seguirle dando
                         moves.append(new_tile)
@@ -243,7 +225,7 @@ class Ai_player():
                 if new_tile in moves or (new_tile.tile not in valid_tiles):
                     continue
 
-                if new_tile.piece == Tile.P_NONE:
+                if new_tile.piece == 0:
                     moves.insert(0, new_tile)  # Prioritize jumps
                     self.get_moves_at_tile(new_tile, player, moves, False)
 
@@ -252,27 +234,24 @@ class Ai_player():
     def move_piece(self, from_tile, to_tile):
 
         # Handle trying to move a non-existant piece and moving into a piece
-        if from_tile.piece == Tile.P_NONE or to_tile.piece != Tile.P_NONE:
+        if from_tile.piece == 0 or to_tile.piece != 0:
             print("Movimiento inválido, vuelva a ingresar valores")
             return False
 
         # Move piece
         to_tile.piece = from_tile.piece
-        from_tile.piece = Tile.P_NONE
+        from_tile.piece = 0
 
-        # Update outline
-        to_tile.outline = Tile.O_MOVED
-        from_tile.outline = Tile.O_MOVED
 
         self.total_plies += 1
 
 
     def find_winner(self):
 
-        if all(g.piece == Tile.P_GREEN for g in self.r_goals):
-            return Tile.P_GREEN
-        elif all(g.piece == Tile.P_RED for g in self.g_goals):
-            return Tile.P_RED
+        if all(g.piece == 1 for g in self.r_goals):
+            return 1
+        elif all(g.piece == 2 for g in self.g_goals):
+            return 2
         else:
             return None
 
@@ -289,17 +268,17 @@ class Ai_player():
 
                 tile = self.board[row][col]
 
-                if tile.piece == Tile.P_GREEN:
+                if tile.piece == 1:
                     distances = [point_distance(tile.loc, g.loc) for g in
-                                 self.r_goals if g.piece != Tile.P_GREEN]
+                                 self.r_goals if g.piece != 1]
                     value -= max(distances) if len(distances) else -50
 
-                elif tile.piece == Tile.P_RED:
+                elif tile.piece == 2:
                     distances = [point_distance(tile.loc, g.loc) for g in
-                                 self.g_goals if g.piece != Tile.P_RED]
+                                 self.g_goals if g.piece != 2]
                     value += max(distances) if len(distances) else -50
 
-        if player == Tile.P_RED:
+        if player == 2:
             value *= -1
 
         return value
@@ -340,15 +319,15 @@ class Ai_player():
             print("Final Stats")
             print("===========")
             print("Final winner:", "green"
-                if winner == Tile.P_GREEN else "red")
+                if winner == 1 else "red")
             print("Total # of plies:", self.total_plies)"""
         elif (validation==False):
             self.human_player_move()
         elif self.c_player is not None:
-            self.execute_computer_move()
+            self.AIba_turn()
         else:  # Toggle the current player
-            self.current_player = (Tile.P_RED
-                if self.current_player == Tile.P_GREEN else Tile.P_GREEN)
+            self.current_player = (2
+                if self.current_player == 1 else 1)
         
 
         
