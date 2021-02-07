@@ -131,80 +131,77 @@ class Ai_player():
 
                 move = {
                     "from": curr_tile,
-                    "to": self.get_valid_moves(curr_tile, player)
+                    "to": self.get_valid_moves(curr_tile)
                 }
                 moves.append(move)
 
         return moves
 
-    def get_valid_moves(self, tile, player, moves=None, adj=True):
+    def get_valid_moves(self, tile, calculated=None, adj=True, next_moves=False):
 
-        if moves is None:
-            moves = []
+        def step_moves(coord, delta_r, delta_c):
+            return(coord.coord[0] + delta_r, coord.coord[1] + delta_c)  
 
-        row = tile.coord[0]
-        col = tile.coord[1]
+        def jump_moves(row, col, delta_r, delta_c):
+            return(row+delta_r, col+delta_c)
 
-        # List of valid tile types to move to
-        valid_tiles = [0, 1, 2]
+        def new_position(r, c):
+            return self.board[r][c]
+
+
+        if calculated is None:
+            calculated = []
+
 
         # Find and save immediately adjacent moves
-        for col_delta in range(-1, 2):
-            for row_delta in range(-1, 2):
+        for delta_c in range(-1, 2):
+            for delta_r in range(-1, 2):
 
                 # Check adjacent tiles
 
-                new_row = row + row_delta
-                new_col = col + col_delta
+                step_r, step_c = step_moves(tile, delta_r, delta_c)
+                #jumps
+                jump_r, jump_c = jump_moves(step_r, step_c, delta_r, delta_c)
 
                 # Skip checking degenerate values
                 #para revisar que no me estoy saliendo del tablero
-                if ((new_row == row and new_col == col) or
-                    new_row < 0 or new_col < 0 or
-                    new_row >= self.b_size or new_col >= self.b_size):
+                if ((step_r == tile.coord[0] and step_c == tile.coord[1]) or step_r < 0 or step_c < 0 or step_r >= self.b_size or step_c >= self.b_size or jump_r < 0 or jump_c < 0 or jump_r >= self.b_size or jump_c >= self.b_size):
                     continue
 
                 # Handle moves out of/in to goals
-                new_tile = self.board[new_row][new_col]
+                new_tile = new_position(step_r,step_c)
                 
                 if new_tile.piece == 0:
                     if adj:  # Don't consider adjacent on subsequent calls 
                     #si hay un movimiento para seguirle dando
-                        moves.append(new_tile)
-                    continue
-
-                # Check jump tiles
-
-                new_row = new_row + row_delta
-                new_col = new_col + col_delta
-
-                # Skip checking degenerate values
-                if (new_row < 0 or new_col < 0 or
-                    new_row >= self.b_size or new_col >= self.b_size):
+                        calculated.append(new_tile)
                     continue
 
                 # Handle returning moves and moves out of/in to goals
-                new_tile = self.board[new_row][new_col] #para no poder regresar a mi área 
-                if new_tile in moves or (new_tile.tile not in valid_tiles):
+                new_tile = new_position(jump_r,jump_c)
+                if new_tile in calculated: 
                     continue
 
                 if new_tile.piece == 0:
-                    moves.insert(0, new_tile)  # Prioritize jumps
-                    self.get_valid_moves(new_tile, player, moves, False)
+                    calculated.append(new_tile)
+                    self.get_valid_moves(new_tile, calculated, False)
 
-        return moves
+        return calculated
 
-    def move_piece(self, from_tile, to_tile):
+    def bunny_step(self, from_coord, to_coord):
 
+        def new_location_bunny(from_coord, to_coord):
+            # Move piece
+            to_coord.piece = from_coord.piece
+            from_coord.piece = 0
+            self.total_plies += 1
+        
         # Handle trying to move a non-existant piece and moving into a piece
-        if from_tile.piece == 0 or to_tile.piece != 0:
+        if from_coord.piece == 0 or to_coord.piece != 0:
             print("Movimiento inválido, vuelva a ingresar valores")
             return False
 
-        # Move piece
-        to_tile.piece = from_tile.piece
-        from_tile.piece = 0
-        self.total_plies += 1
+        new_location_bunny(from_coord, to_coord) 
 
 
     def win_analyzer(self):
@@ -283,7 +280,7 @@ class Ai_player():
         print("Al-ba se ha movido de "+str(move[0])+" a "+str(move[1]))
         move_from = self.board[move[0][0]][move[0][1]]
         move_to = self.board[move[1][0]][move[1][1]]
-        self.move_piece(move_from, move_to)
+        self.bunny_step(move_from, move_to)
 
         winner = self.win_analyzer()
         if winner:
@@ -311,7 +308,7 @@ class Ai_player():
         move_to_col = int(input("Ingrese columna a donde desea moverla :"))
         
         move_from = self.board[move_from_row][move_from_col]
-        self.valid_moves = self.get_valid_moves(move_from,1)
+        self.valid_moves = self.get_valid_moves(move_from)
 
         move_to = self.board[move_to_row][move_to_col]
         print("Te has movido de ("+str(move_from_row)+","+str(move_from_col)+") a ("+str(move_to_row)+","+str(move_to_col)+")")
@@ -319,7 +316,7 @@ class Ai_player():
             print("Ese movimiento no es válido")
             return
         else:
-            validation = self.move_piece(move_from, move_to)
+            validation = self.bunny_step(move_from, move_to)
 
         winner = self.win_analyzer()
         if winner:
