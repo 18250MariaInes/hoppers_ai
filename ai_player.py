@@ -25,6 +25,7 @@ class Ai_player():
         self.board = Board.initialize_game_board(self.size_of_board)
         self.current_player = 1
         self.aiba_zone, self.human_zone =  Board.set_gamer_territory(self.board)
+        self.moves_aiba=[]
 
         # Print initial program info
         print("Hoppers game with AI by María Inés Vásquez")
@@ -184,8 +185,16 @@ class Ai_player():
                 moves = possible_moves((2
                         if player_turn == 1 else 1))
             # por cada movida se calcula si el tiempo ha sido superado, si no se sigue evaluando
+            """print("============movimiento de alba===========================")
+            print(moves)
+            self.moves_aiba=moves"""
             for move in moves:
+                """print("============origen===================")
+                print(move["from"].coord)
+                #print(move["to"])
+                print("============destino===================")"""
                 for to in move["to"]:
+                    #print(to.coord)
                     if time.time() > max_time:
                         return best_val, best_move
 
@@ -235,9 +244,19 @@ class Ai_player():
         end = time.time()
 
         #movimiento seleccionado se ejecuta
-        print("AI-ba se ha movido de "+str(move[0])+" a "+str(move[1]))
+        print("===========aiba move===========")
+        move_from_aiba = self.board[move[0][0]][move[0][1]]
+        #print(move_from_aiba)
+
+        self.moves_aiba = self.get_valid_moves(move_from_aiba)
         move_from = self.board[move[0][0]][move[0][1]]
         move_to = self.board[move[1][0]][move[1][1]]
+        #print(self.moves_aiba)
+        for a in self.moves_aiba:
+            print(a.coord)
+            if (a.coord==move_to.coord):
+                break
+        print("AI-ba se ha movido de "+str(move[0])+" a "+str(move[1]))
         self.bunny_step(move_from, move_to)
         #se calcula ganador, si ganó AI-ba se termina el juego
         winner = self.win_analyzer()
@@ -270,12 +289,18 @@ class Ai_player():
         #se obtiene la pieza del tablero que desea mover
         move_from = self.board[move_from_row][move_from_col]
         #se calcula los movimientos validos desde ese
+        """print("==========move from human============")
+        print(move_from)"""
         self.valid_moves = self.get_valid_moves(move_from)
         #se obtiene la pieza del tablero de a donde desea moverse
         move_to = self.board[move_to_row][move_to_col]
         print("Te has movido de ("+str(move_from_row)+","+str(move_from_col)+") a ("+str(move_to_row)+","+str(move_to_col)+")")
         #si la nueva pieza no esta entre los validos vuelve a repetirse el turno
+        print("============================Camino de pasos===============================")
+        for i in self.valid_moves:
+            print(i.coord)
         if (move_to not in self.valid_moves):
+            print(move_to)
             print("Ese movimiento no es válido")
             return
         else:
