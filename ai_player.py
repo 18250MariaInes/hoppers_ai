@@ -5,11 +5,9 @@ AI-ba player for Hopper game board
 AI player
 """
 
-# Python Standard Library imports
 import time
 import math
 
-# Custom module imports
 from board_game_components import Board, Bunny
 
 
@@ -84,12 +82,12 @@ class Ai_player():
 
         return calculated
 
-#función para mover conejo
+    #función para mover conejo
     def bunny_step(self, from_coord, to_coord):
 
     #cambio de paso o salto del conejo
         def new_location_bunny(from_coord, to_coord):
-            # Move piece
+            # Mover pieza
             to_coord.piece = from_coord.piece
             from_coord.piece = 0
             self.depth_of_game += 1
@@ -126,11 +124,10 @@ class Ai_player():
         
         return None
 
-  
+    #logica del turno de AI-ba
     def AIba_turn(self):
-
-        def minimax(depth, player_to_max, max_time, a=float("-inf"),
-                b=float("inf"), maxing=True, prunes=0, boards=0):
+        #función de minimax
+        def minimax(depth_to_reach, player_turn, max_time, a=float("-inf"), b=float("inf"), maxing=True):
 
             def possible_moves(player=1):
                 moves = []  #calculo de posibles movimientos del jugador en turno
@@ -173,36 +170,33 @@ class Ai_player():
                 return value
 
             # regresar mejor valor en el caso que se ha llegado hasta el fondo, se ha ganado o el tiempo de ejecución a superado al máximo
-            if depth == 0 or self.win_analyzer() or time.time() > max_time:
-                return heuristic_function(player_to_max), None, prunes, boards
+            if depth_to_reach == 0 or self.win_analyzer() or time.time() > max_time:
+                return heuristic_function(player_turn), None
 
             best_move = None
 
             #calculo de los posibles movimientos del max y el min
             if maxing:
                 best_val = float("-inf")
-                moves = possible_moves(player_to_max)
+                moves = possible_moves(player_turn)
             else:
                 best_val = float("inf")
                 moves = possible_moves((2
-                        if player_to_max == 1 else 1))
+                        if player_turn == 1 else 1))
             # por cada movida se calcula si el tiempo ha sido superado, si no se sigue evaluando
             for move in moves:
                 for to in move["to"]:
                     if time.time() > max_time:
-                        return best_val, best_move, prunes, boards
+                        return best_val, best_move
 
                     # Movimiento de pieza en el tablero
                     piece = move["from"].piece
                     move["from"].piece = 0
                     to.piece = piece
-                    boards += 1
 
                     #se vuelve a llamar recurivamente, per turnarndo al not maxing para desarrollar todos los nodos hasta la profundidad programada
-                    val, _, new_prunes, new_boards = minimax(depth - 1,
-                        player_to_max, max_time, a, b, not maxing, prunes, boards)
-                    prunes = new_prunes
-                    boards = new_boards
+                    val, _  = minimax(depth_to_reach - 1,
+                        player_turn, max_time, a, b, not maxing )
 
                     # Se regresa la posición dado que no se ha seleccionado aún
                     to.piece = 0
@@ -221,13 +215,12 @@ class Ai_player():
                         b = min(b, val)
                     #funcion de alpha-beta prunning para recortar el árbol de decisión
                     if b <= a:
-                        return best_val, best_move, prunes + 1, boards
+                        return best_val, best_move
             #luego de terminar de revisar todos los movimientos se regresa el mejor movimiento encontrado para el jugador
-            return best_val, best_move, prunes, boards
+            return best_val, best_move
 
         
         # Inicio de turno de AI-ba
-        #inicialización de turno
         current_turn = (self.depth_of_game // 2) + 1
         print("Turn de AI-ba")
         print("--------------------------")
@@ -237,12 +230,12 @@ class Ai_player():
 
         # Se realiza el minimax de sus movimientos
         start = time.time()
-        _, move, prunes, boards = minimax(self.ply_depth,
+        _, move  = minimax(self.ply_depth,
             self.aiba_player, max_time)
         end = time.time()
 
         #movimiento seleccionado se ejecuta
-        print("Al-ba se ha movido de "+str(move[0])+" a "+str(move[1]))
+        print("AI-ba se ha movido de "+str(move[0])+" a "+str(move[1]))
         move_from = self.board[move[0][0]][move[0][1]]
         move_to = self.board[move[1][0]][move[1][1]]
         self.bunny_step(move_from, move_to)

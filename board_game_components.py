@@ -42,18 +42,9 @@ class Board():
         
 #clase de las piezas que son conejos
 class Bunny():
-
     def __init__(self, tile=0, piece=0, row=0, col=0):
         self.tile = tile
-        self.piece = piece
-
         self.row = row
+        self.piece = piece
         self.column = col
         self.coord = (row, col)
-
-
-    def __str__(self):
-        return chr(self.coord[1] + 97) + str(self.coord[0] + 1)
-
-    def __repr__(self):
-        return chr(self.coord[1] + 97) + str(self.coord[0] + 1)
