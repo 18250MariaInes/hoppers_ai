@@ -7,7 +7,8 @@ AI player
 
 import time
 import math
-
+from xml.dom import minidom
+import os 
 from board_game_components import Board, Bunny
 
 
@@ -270,6 +271,40 @@ class Ai_player():
 
         self.computing = False
         print()
+
+        #XML that will be returned
+        root = minidom.Document()
+  
+        xml = root.createElement('move') 
+        root.appendChild(xml)
+        
+        productChild = root.createElement('from')
+        productChild.setAttribute('row', str(move[0][0]))
+        productChild.setAttribute('col', str(move[0][1]))
+
+        toChild = root.createElement('to')
+        toChild.setAttribute('row', str(move[1][0]))
+        toChild.setAttribute('col', str(move[1][1]))
+        
+        xml.appendChild(productChild)
+        xml.appendChild(toChild)
+
+        path = root.createElement('path')
+        xml.appendChild(path)
+
+        for a in self.moves_aiba:
+            print(a.coord)
+            pos1 = root.createElement('pos')
+            pos1.setAttribute('row', str(a.coord[0]))
+            pos1.setAttribute('col', str(a.coord[1]))
+            path.appendChild(pos1)
+            if (a.coord==move_to.coord):
+                break
+          
+        xml_str = root.toprettyxml(indent ="\t") 
+
+        print(xml_str)
+        return xml_str
     
     #Jugada de humano
     def human_player_move(self):
