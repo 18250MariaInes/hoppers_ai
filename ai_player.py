@@ -212,14 +212,7 @@ class Ai_player():
                 moves = possible_moves((2
                         if player_turn == 1 else 1))
             # por cada movida se calcula si el tiempo ha sido superado, si no se sigue evaluando
-            """print("============movimiento de alba===========================")
-            print(moves)
-            self.moves_aiba=moves"""
             for move in moves:
-                """print("============origen===================")
-                print(move["from"].coord)
-                #print(move["to"])
-                print("============destino===================")"""
                 for to in move["to"]:
                     #print(to.coord)
                     if time.time() > max_time:
@@ -352,8 +345,6 @@ class Ai_player():
         #se obtiene la pieza del tablero que desea mover
         move_from = self.board[move_from_row][move_from_col]
         #se calcula los movimientos validos desde ese
-        """print("==========move from human============")
-        print(move_from)"""
         self.valid_moves = self.get_valid_moves(move_from)
         #se obtiene la pieza del tablero de a donde desea moverse
         move_to = self.board[move_to_row][move_to_col]
