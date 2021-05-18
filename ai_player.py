@@ -27,6 +27,7 @@ class Ai_player():
         self.current_player = 1
         self.aiba_zone, self.human_zone =  Board.set_gamer_territory(self.board)
         self.moves_aiba=[]
+        self.turns=1
 
         # Print initial program info
         print("Hoppers game with AI by María Inés Vásquez")
@@ -144,17 +145,39 @@ class Ai_player():
                         moves.append(move)
                 return moves
 
-            def heuristic_function(player):
+            def max_heuristic_function(player):
+                def pitagoras(p0, p1):
+                    return math.sqrt((p1[0] - p0[0])**2 + (p1[1] - p0[1])**2)
+                value = 0
+                for col in range(self.size_of_board):
+                    for row in range(self.size_of_board):
+                        tile = self.board[row][col]
+                        if tile.piece == 1:
+                            distances = [pitagoras(tile.coord, g.coord) for g in
+                                        self.aiba_zone if g.piece != 1]
+                            value -= max(distances) if len(distances) else -50
 
+                        elif tile.piece == 2:
+                            distances = [pitagoras(tile.coord, g.coord) for g in
+                                        self.human_zone if g.piece != 2]
+                            value += max(distances) if len(distances) else -50
+
+                if player == 2:
+                    value *= -1
+
+                return value
+            
+            def heuristic_function(player):
                 def distance_to_goal(p0):
                     #funcion heuristica se basa en escoger la distancia que más avance hasta la esquina del jugador opuesto
                     if (player ==2):
+                        #juego de maquina
                         p1 = (9,9)
                         return (math.sqrt((p1[0] - p0[0])**2 + (p1[1] - p0[1])**2))*-1
                     else:
+                        #juego de humano
                         p1 = (0,0)
                         return (math.sqrt((p1[0] - p0[0])**2 + (p1[1] - p0[1])**2))
-
                 value = 0
                 
                 for col in range(self.size_of_board):
@@ -173,7 +196,10 @@ class Ai_player():
 
             # regresar mejor valor en el caso que se ha llegado hasta el fondo, se ha ganado o el tiempo de ejecución a superado al máximo
             if depth_to_reach == 0 or self.win_analyzer() or time.time() > max_time:
-                return heuristic_function(player_turn), None
+                if (self.turns<40):
+                    return heuristic_function(player_turn), None
+                else:
+                    return max_heuristic_function(player_turn), None
 
             best_move = None
 
@@ -258,6 +284,7 @@ class Ai_player():
             if (a.coord==move_to.coord):
                 break
         print("AI-ba se ha movido de "+str(move[0])+" a "+str(move[1]))
+        self.turns+=1
         self.bunny_step(move_from, move_to)
         #se calcula ganador, si ganó AI-ba se termina el juego
         winner = self.win_analyzer()
@@ -310,6 +337,7 @@ class Ai_player():
     def human_player_move(self):
         current_turn = (self.depth_of_game // 2) + 1
         validation = True
+        print("Turno número "+str(self.turns)+" del juego")
         print("¡Tu turno!")
         print("----------------------------------")
 
@@ -330,6 +358,7 @@ class Ai_player():
         #se obtiene la pieza del tablero de a donde desea moverse
         move_to = self.board[move_to_row][move_to_col]
         print("Te has movido de ("+str(move_from_row)+","+str(move_from_col)+") a ("+str(move_to_row)+","+str(move_to_col)+")")
+        self.turns+=1
         #si la nueva pieza no esta entre los validos vuelve a repetirse el turno
         print("============================Camino de pasos===============================")
         for i in self.valid_moves:
