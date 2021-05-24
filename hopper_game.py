@@ -15,4 +15,5 @@ while hopper.win_analyzer() == None:
             print(j.piece, end=" ")
         print()
     print("------------------------------------")
-    hopper.human_player_move()
+    hopper.AIba_turn(2)
+    hopper.AIba_turn(1)

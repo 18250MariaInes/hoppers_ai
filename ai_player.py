@@ -128,7 +128,7 @@ class Ai_player():
         return None
 
     #logica del turno de AI-ba
-    def AIba_turn(self):
+    def AIba_turn(self, turn=1):
         #función de minimax
         def minimax(depth_to_reach, player_turn, max_time, a=float("-inf"), b=float("inf"), maxing=True):
 
@@ -251,7 +251,7 @@ class Ai_player():
         
         # Inicio de turno de AI-ba
         current_turn = (self.depth_of_game // 2) + 1
-        print("Turn de AI-ba")
+        print("Turn de AI-ba "+str(turn))
         print("--------------------------")
         print("Calculando ...")
         self.computing = True
@@ -260,7 +260,7 @@ class Ai_player():
         # Se realiza el minimax de sus movimientos
         start = time.time()
         _, move  = minimax(self.ply_depth,
-            self.aiba_player, max_time)
+            turn, max_time)
         end = time.time()
 
         #movimiento seleccionado se ejecuta
@@ -282,7 +282,7 @@ class Ai_player():
         #se calcula ganador, si ganó AI-ba se termina el juego
         winner = self.win_analyzer()
         if winner:
-            print("AI-BA HA GANADO!")
+            print("AI-BA "+str(turn)+" HA GANADO!")
             self.current_player = None
         #si no ha ganado se cede el turno al jugador humano
         else: 
@@ -324,6 +324,7 @@ class Ai_player():
         xml_str = root.toprettyxml(indent ="\t") 
 
         print(xml_str)
+            
         return xml_str
     
     #Jugada de humano
