@@ -128,7 +128,7 @@ class Ai_player():
         return None
 
     #logica del turno de AI-ba
-    def AIba_turn(self, turn=1):
+    def AIba_turn(self, turn=2):
         #función de minimax
         def minimax(depth_to_reach, player_turn, max_time, a=float("-inf"), b=float("inf"), maxing=True):
 
